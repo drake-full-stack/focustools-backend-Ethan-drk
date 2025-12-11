@@ -1,21 +1,16 @@
-function TaskItem({ task, isActive, onSelect, onToggleComplete, onDelete }) {
+function TaskItem({expense, onSelect, onDelete }) {
   return (
-    <div className={`task-item ${isActive ? 'active' : ''} ${task.completed ? 'completed' : ''}`}>
-      {/* Checkbox for completion */}
-      <input
-        type="checkbox"
-        checked={task.completed}
-        onChange={onToggleComplete}
-        className="task-checkbox"
-      />
+    <div className={`task-item`}>
 
       {/* Task content - clicking selects for Pomodoro */}
       <div className="task-content" onClick={onSelect}>
-        <h3 className="task-title">{task.title}</h3>
+        <h3 className="task-title">{expense.title}</h3>
+        <h3 className="task-title">{expense.type}</h3>
+        <h3 className="task-title">{expense.amount}</h3>
         <div className="task-meta">
-          {task.pomodoroCount > 0 && (
+          {expense.pomodoroCount > 0 && (
             <span className="pomodoro-badge">
-              🍅 × {task.pomodoroCount}
+              {expense.pomodoroCount}
             </span>
           )}
         </div>

@@ -1,31 +1,35 @@
 import { useState, useEffect } from 'react';
+import Chart from "chart.js/auto";
+import { CategoryScale } from "chart.js";
+import BarChart from "components/BarChart";
 import './App.css';
 import TaskList from './components/TaskList';
-import PomodoroTimer from './components/PomodoroTimer';
-import { getTasks, createTask, updateTask, deleteTask } from './api/Tasks';
-
+//import { getExpenses, createExpense, updateExpenses, deleteExpense } from './api/Expenses';
+import { getExpenses, createExpense, deleteExpense } from './api/Expenses';
 function App() {
   // State management
-  const [tasks, setTasks] = useState([]);
-  const [activeTask, setActiveTask] = useState(null);
-  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [expenses, setExpenses] = useState([]);
+  const [activeExpense, setActiveExpense] = useState(null);
+  const [newExpenseTitle, setNewExpenseTitle] = useState('');
+  const [newExpenseType, setNewExpenseType] = useState("");
+  const [newExpenseAmount, setNewExpenseAmount] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Load tasks from database on mount
   useEffect(() => {
-    loadTasks();
+    loadExpenses();
   }, []);
 
   /**
    * Fetch all tasks from backend
    */
-  const loadTasks = async () => {
+  const loadExpenses = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getTasks();
-      setTasks(data);
+      const data = await getExpenses();
+      setExpenses(data);
     } catch (err) {
       console.error('Error loading tasks:', err);
       setError('Failed to load tasks. Make sure your backend is running.');
@@ -39,17 +43,20 @@ function App() {
    */
   const handleAddTask = async (e) => {
     e.preventDefault();
-    if (!newTaskTitle.trim()) return;
+    if (!newExpenseTitle.trim()) return;
 
     try {
       // 1. Save to database via backend
-      const newTask = await createTask({ title: newTaskTitle });
+      const newExpense = await createExpense({ title: newExpenseTitle, type: newExpenseType, amount: newExpenseAmount});
       
       // 2. Update React state (add to beginning of list)
-      setTasks([newTask, ...tasks]);
+      setExpenses([newExpense, ...expenses]);
       
       // 3. Clear input
-      setNewTaskTitle('');
+      setNewExpenseTitle("");
+      setNewExpenseType("");
+      setNewExpenseAmount("");
+      setError(null);
     } catch (err) {
       console.error('Error creating task:', err);
       setError('Failed to add task');
@@ -58,19 +65,19 @@ function App() {
 
   /**
    * Toggle task completion
-   */
+   
   const handleToggleComplete = async (taskId) => {
     try {
       // Find the task to get current completion status
-      const task = tasks.find(t => t._id === taskId);
+      const task = expenses.find(t => t._id === taskId);
       
       // 1. Update in database
-      const updatedTask = await updateTask(taskId, { 
+      const updatedTask = await updateExpenses(taskId, { 
         completed: !task.completed 
       });
       
       // 2. Update in React state
-      setTasks(tasks.map(t => 
+      setExpenses(expenses.map(t => 
         t._id === taskId ? updatedTask : t
       ));
     } catch (err) {
@@ -78,21 +85,23 @@ function App() {
       setError('Failed to update task');
     }
   };
+*/
+
 
   /**
    * Delete a task
    */
-  const handleDeleteTask = async (taskId) => {
+  const handleDeleteExpense = async (taskId) => {
     try {
       // 1. Delete from database
-      await deleteTask(taskId);
+      await deleteExpense(taskId);
       
       // 2. Remove from React state
-      setTasks(tasks.filter(t => t._id !== taskId));
+      setExpenses(expenses.filter(t => t._id !== taskId));
       
       // 3. Clear active task if it was deleted
-      if (activeTask?._id === taskId) {
-        setActiveTask(null);
+      if (activeExpense?._id === taskId) {
+        setActiveExpense(null);
       }
     } catch (err) {
       console.error('Error deleting task:', err);
@@ -100,37 +109,6 @@ function App() {
     }
   };
 
-  /**
-   * Select a task to work on with Pomodoro
-   */
-  const handleSelectTask = (task) => {
-    setActiveTask(task);
-  };
-
-  /**
-   * When a Pomodoro completes, increment the task's count
-   */
-  const handlePomodoroComplete = async () => {
-    if (!activeTask) return;
-
-    try {
-      // 1. Update in database (increment pomodoroCount)
-      const updatedTask = await updateTask(activeTask._id, {
-        pomodoroCount: activeTask.pomodoroCount + 1
-      });
-      
-      // 2. Update in React state
-      setTasks(tasks.map(t => 
-        t._id === activeTask._id ? updatedTask : t
-      ));
-      
-      // 3. Update active task reference
-      setActiveTask(updatedTask);
-    } catch (err) {
-      console.error('Error updating Pomodoro count:', err);
-      setError('Failed to update Pomodoro count');
-    }
-  };
 
   // Loading state
   if (loading) {
@@ -165,11 +143,25 @@ function App() {
           <form onSubmit={handleAddTask} className="add-task-form">
             <input
               type="text"
-              value={newTaskTitle}
-              onChange={(e) => setNewTaskTitle(e.target.value)}
+              value={newExpenseTitle}
+              onChange={(e) => setNewExpenseTitle(e.target.value)}
               placeholder="What do you need to focus on?"
               className="task-input"
             />
+            <input
+            type="text"
+            placeholder="Type"
+            value={newExpenseType}
+            onChange={(e) => setNewExpenseType(e.target.value)}
+            />
+            <input
+            type="number"
+            step="0.01"
+            placeholder="Amount"
+            value={newExpenseAmount}
+            onChange={(e) => setNewExpenseAmount(e.target.value)}
+            />
+
             <button type="submit" className="add-button">
               Add Task
             </button>
@@ -177,35 +169,11 @@ function App() {
 
           {/* Task List */}
           <TaskList
-            tasks={tasks}
-            activeTask={activeTask}
-            onSelectTask={handleSelectTask}
-            onToggleComplete={handleToggleComplete}
-            onDeleteTask={handleDeleteTask}
+            expenses={expenses}
+            activeExpense={activeExpense}
+            //onToggleComplete={handleToggleComplete}
+            onDeleteTask={handleDeleteExpense}
           />
-        </div>
-
-        {/* Right side: Pomodoro Timer */}
-        <div className="timer-section">
-          <h2>Focus Time</h2>
-          {activeTask ? (
-            <>
-              <div className="active-task-display">
-                <p>Working on:</p>
-                <h3>{activeTask.title}</h3>
-                <p className="pomodoro-count">
-                  🍅 {activeTask.pomodoroCount} Pomodoro{activeTask.pomodoroCount !== 1 ? 's' : ''} completed
-                </p>
-              </div>
-              <PomodoroTimer
-                onComplete={handlePomodoroComplete}
-              />
-            </>
-          ) : (
-            <div className="no-task-selected">
-              <p>← Select a task to start focusing</p>
-            </div>
-          )}
         </div>
       </div>
     </div>

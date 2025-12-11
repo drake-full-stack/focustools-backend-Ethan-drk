@@ -17,11 +17,7 @@ const expenseSchema = new mongoose.Schema(
       type: Number,
       required: true, 
       trim: true, 
-    },
-    dueDate: {
-    type: Date,
-    required: true
-  }
+    }
   },
   {
     timestamps: true,

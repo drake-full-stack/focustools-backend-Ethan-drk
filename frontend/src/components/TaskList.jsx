@@ -1,24 +1,22 @@
+//import Expense from '../../../backend/models/Expense';
 import TaskItem from './TaskItem';
 
-function TaskList({ tasks, activeTask, onSelectTask, onToggleComplete, onDeleteTask }) {
-  if (tasks.length === 0) {
+function TaskList({ expenses, onDeleteExpense }) {
+  if (expenses.length === 0) {
     return (
       <div className="empty-state">
-        <p>No tasks yet. Add one above to get started!</p>
+        <p>No expenses yet. Add one above to get started!</p>
       </div>
     );
   }
 
   return (
     <div className="task-list">
-      {tasks.map((task) => (
+      {expenses.map((expense) => (
         <TaskItem
-          key={task._id}
-          task={task}
-          isActive={activeTask?._id === task._id}
-          onSelect={() => onSelectTask(task)}
-          onToggleComplete={() => onToggleComplete(task._id)}
-          onDelete={() => onDeleteTask(task._id)}
+          key={expense._id}
+          expense={expense}
+          onDelete={() => onDeleteExpense(expense._id)}
         />
       ))}
     </div>

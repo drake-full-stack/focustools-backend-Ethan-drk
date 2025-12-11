@@ -2,30 +2,30 @@
 const API_URL = 'http://localhost:3000';
 
 /**
- * Fetch all tasks from backend
+ * Fetch all expense from backend
  */
-export const getTasks = async () => {
-  const response = await fetch(`${API_URL}/api/tasks`);
+export const getExpenses = async () => {
+  const response = await fetch(`${API_URL}/api/expenses`);
   if (!response.ok) {
-    throw new Error('Failed to fetch tasks');
+    throw new Error('Failed to fetch expense');
   }
   return response.json();
 };
 
 /**
  * Create a new task
- * @param {Object} taskData - { title: string }
+ * @param {Object} expenseData - { title: string }
  */
-export const createTask = async (taskData) => {
-  const response = await fetch(`${API_URL}/api/tasks`, {
+export const createExpense = async (expenseData) => {
+  const response = await fetch(`${API_URL}/api/expenses`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(taskData),
+    body: JSON.stringify(expenseData),
   });
   if (!response.ok) {
-    throw new Error('Failed to create task');
+    throw new Error('Failed to create expense');
   }
   return response.json();
 };
@@ -35,8 +35,8 @@ export const createTask = async (taskData) => {
  * @param {string} id - Task ID
  * @param {Object} updates - Fields to update
  */
-export const updateTask = async (id, updates) => {
-  const response = await fetch(`${API_URL}/api/tasks/${id}`, {
+export const updateExpense = async (id, updates) => {
+  const response = await fetch(`${API_URL}/api/expense/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ export const updateTask = async (id, updates) => {
     body: JSON.stringify(updates),
   });
   if (!response.ok) {
-    throw new Error('Failed to update task');
+    throw new Error('Failed to update expense');
   }
   return response.json();
 };
@@ -53,12 +53,12 @@ export const updateTask = async (id, updates) => {
  * Delete a task
  * @param {string} id - Task ID
  */
-export const deleteTask = async (id) => {
-  const response = await fetch(`${API_URL}/api/tasks/${id}`, {
+export const deleteExpense = async (id) => {
+  const response = await fetch(`${API_URL}/api/expense/${id}`, {
     method: 'DELETE',
   });
   if (!response.ok) {
-    throw new Error('Failed to delete task');
+    throw new Error('Failed to delete expense');
   }
   return response.json();
 };

@@ -59,6 +59,31 @@ app.get("/api/expenses", async (req, res) => {
   }
 });
 
+app.get("/api/expenses/totals", async (req, res) => {
+  try {
+    const totals = await Expense.aggregate([
+      {
+        $group: {
+          _id: "$type",
+          totalAmount: { $sum: "$amount" }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          type: "$_id",
+          totalAmount: 1
+        }
+      }
+    ]);
+
+    res.json(totals);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error calculating totals");
+  }
+});
+
 app.get("/api/expenses/:id", async (req, res) => {
   try {
     const expense = await Expense.findById(req.params.id);
@@ -101,9 +126,9 @@ app.put("/api/expense/:id", async (req, res) => {
 
 app.delete("/api/expense/:id", async (req, res) => {
   try {
-    const deletedExpense = await Expense.findByIdAndDelete(req.params.id);
+    const deleteExpense = await Expense.findByIdAndDelete(req.params.id);
 
-    if (!deletedExpense) {
+    if (!deleteExpense) {
       return res.status(404).json({
         message: "Expense not found",
       });
@@ -111,7 +136,7 @@ app.delete("/api/expense/:id", async (req, res) => {
 
     res.json({
       message: "Expense deleted successfully",
-      Expense: deletedExpense,
+      Expense: deleteExpense,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
